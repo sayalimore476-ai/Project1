@@ -9,7 +9,7 @@ app.use(express.json());
 // Connect to MongoDB
 connectDB();
 // Define routes
-app.use("/api/auth", require("./routes/authRoute"));
+app.use("/api/auth", require("./routes/authRoutes"));
 app.get("/", (req, res) => {
     res.send("Backend is running");
 });

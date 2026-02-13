@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState } from "react"
 
 function Login({ onLogin }) {
   const [email, setEmail] = useState("");
@@ -7,23 +7,28 @@ function Login({ onLogin }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      const response = await fetch("http://localhost:5000/api/auth/login", {
+    setError("");
+  
+    try{
+      const response = await fetch("http://localhost:5000/api/auth/login",{
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        headers: {  
+          "Content-Type": "application/json",
+
+        },
+        body: JSON.stringify({email, password}),
       });
       const data = await response.json();
-      if (response.ok) {
-  
+      if(response.ok){
         onLogin();
-      } else {
+      }else {
         setError(data.message || "Login failed");
       }
-    } catch (err) {
-      setError("An error occurred. Please try again.");
+    } catch (err){
+      setError("An error occured during login/server might be down");
     }
   };
+
 
     return (
         <div style={{ maxWidth: "400px", margin: "0 auto", padding: "20px", }}>

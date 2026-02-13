@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-function Registration({ onRegisterSuccessful }) {
+function Registration({ onRegisterSuccesful }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -21,33 +21,42 @@ function Registration({ onRegisterSuccessful }) {
 
       const res = await fetch("http://localhost:5000/api/auth/register", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
+        mode: "cors", // added for CORS handling
         body: JSON.stringify({ name, email, password }),
       });
 
-      const data = await res.json();
+      // Handle case where server doesn't return JSON
+      let data = {};
+      try {
+        data = await res.json();
+      } catch (err) {
+        data = {};
+      }
 
-      // ❌ error case
-      if (!res.ok) {
-        setMessage(data.message || "Registration failed");
-        setLoading(false);
+      if (res.ok) {
+        setMessage(data.message || "Registration Successful!");
+
+        // clear form
+        setName("");
+        setEmail("");
+        setPassword("");
+
+        setTimeout(() => {
+          onRegisterSuccesful();
+        }, 2000);
+
         return;
       }
 
-      // ✅ success
-      setMessage("Registration Successful!");
-      setName("");
-      setEmail("");
-      setPassword("");
-      setLoading(false);
-
-      setTimeout(() => {
-        onRegisterSuccessful();
-      }, 1500);
-
+      // Non-OK response (400/500)
+      setMessage(data.message || "Registration failed");
     } catch (err) {
-      console.error(err);
-      setMessage("Server error");
+      console.error("Fetch Error:", err);
+      setMessage("Cannot connect to server. Make sure backend is running.");
+    } finally {
       setLoading(false);
     }
   };
@@ -59,26 +68,35 @@ function Registration({ onRegisterSuccessful }) {
       {message && <p>{message}</p>}
 
       <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          placeholder="Enter name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
+        <div>
+          <input
+            type="text"
+            placeholder="Enter name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            autoComplete="name"
+          />
+        </div>
 
-        <input
-          type="email"
-          placeholder="Enter email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
+        <div>
+          <input
+            type="email"
+            placeholder="Enter email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            autoComplete="email"
+          />
+        </div>
 
-        <input
-          type="password"
-          placeholder="Enter password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+        <div>
+          <input
+            type="password"
+            placeholder="Enter password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            autoComplete="new-password"
+          />
+        </div>
 
         <button type="submit" disabled={loading}>
           {loading ? "Registering..." : "Register"}
