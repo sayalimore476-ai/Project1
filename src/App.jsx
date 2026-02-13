@@ -1,51 +1,62 @@
-import { useEffect, useState } from 'react'
-import Login from './pages/Login.jsx'
-import Registration from './pages/Registration.jsx'
-import Landing from './pages/Landing.jsx'
-import Home from './pages/Home.jsx'
-import About from './pages/About.jsx'
-import Contact from './pages/Contact.jsx'
-import Dashboard from './pages/Dashboard.jsx'
-import ApiDemo from './pages/ApiDemo.jsx'
+import { useEffect, useState } from "react";
+
+import Landing from "./pages/Landing.jsx";
+import Home from "./pages/Home.jsx";
+import About from "./pages/About.jsx";
+import Contact from "./pages/Contact.jsx";
+import Registration from "./pages/Registration.jsx";
+import Login from "./pages/Login.jsx";
+import Dashboard from "./pages/Dashboard.jsx";
+import ApiDemo from "./pages/ApiDemo.jsx";
 
 function App() {
   const [page, setPage] = useState("landing");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  // session restore on refresh
+  // 🔄 Restore session on refresh
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("user"));
-    if (user && user.isLoggedIn) {
+    if (user?.isLoggedIn) {
       setIsLoggedIn(true);
-      setPage("dashboard"); // auto-redirect if logged in
+      setPage("dashboard");
     }
   }, []);
 
   return (
     <div>
+      {/* Landing */}
       {page === "landing" && <Landing onNavigate={setPage} />}
 
+      {/* Public Pages */}
       {page === "home" && <Home />}
       {page === "about" && <About />}
       {page === "contact" && <Contact />}
       {page === "api" && <ApiDemo />}
+
+      {/* Register */}
       {page === "register" && (
-        <Registration onRegisterSuccesful={() => setPage("login")} />
+        <Registration
+          onRegisterSuccessful={() => setPage("login")}
+        />
       )}
 
+      {/* Login */}
       {page === "login" && (
         <Login
           onLogin={() => {
             setIsLoggedIn(true);
-            localStorage.setItem("user", JSON.stringify({ isLoggedIn: true }));
+            localStorage.setItem(
+              "user",
+              JSON.stringify({ isLoggedIn: true })
+            ); 
             setPage("dashboard");
           }}
         />
       )}
 
-      {/* 🔐 Protected Route */}
-      {page === "dashboard" && (
-        isLoggedIn ? (
+      {/* 🔐 Protected Dashboard */}
+      {page === "dashboard" &&
+        (isLoggedIn ? (
           <Dashboard
             onLogout={() => {
               setIsLoggedIn(false);
@@ -57,14 +68,16 @@ function App() {
           <Login
             onLogin={() => {
               setIsLoggedIn(true);
-              localStorage.setItem("user", JSON.stringify({ isLoggedIn: true }));
+              localStorage.setItem(
+                "user",
+                JSON.stringify({ isLoggedIn: true })
+              );
               setPage("dashboard");
             }}
           />
-        )
-      )}
+        ))}
 
-      {/* Dev button */}
+      {/* Dev shortcut */}
       <button onClick={() => setPage("api")}>ApiDemo</button>
     </div>
   );

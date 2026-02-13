@@ -1,12 +1,13 @@
 import { useState } from "react";
 
-function Registration({onRegisterSuccesful}) {
+function Registration({ onRegisterSuccessful }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!name || !email || !password) {
@@ -14,30 +15,42 @@ function Registration({onRegisterSuccesful}) {
       return;
     }
 
-    //Storing data locally here
-    const userData = {
-      name,
-      email,
-      password,
-    };
+    try {
+      setLoading(true);
+      setMessage("");
 
-    localStorage.setItem("userData", JSON.stringify(userData));
-    // for now just showing success
-    setMessage("Registration successful ✅");
+      const res = await fetch("http://localhost:5000/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password }),
+      });
 
-    // clear form
-    setName("");
-    setEmail("");
-    setPassword("");
-  
+      const data = await res.json();
 
-  setTimeout(() => {
-  onRegisterSuccesful();  
-  },2000);
-};
+      // ❌ error case
+      if (!res.ok) {
+        setMessage(data.message || "Registration failed");
+        setLoading(false);
+        return;
+      }
 
+      // ✅ success
+      setMessage("Registration Successful!");
+      setName("");
+      setEmail("");
+      setPassword("");
+      setLoading(false);
 
+      setTimeout(() => {
+        onRegisterSuccessful();
+      }, 1500);
 
+    } catch (err) {
+      console.error(err);
+      setMessage("Server error");
+      setLoading(false);
+    }
+  };
 
   return (
     <div style={{ width: "300px", margin: "50px auto" }}>
@@ -46,34 +59,30 @@ function Registration({onRegisterSuccesful}) {
       {message && <p>{message}</p>}
 
       <form onSubmit={handleSubmit}>
-        <div>
-          <input
-            type="text"
-            placeholder="Enter name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-        </div>
+        <input
+          type="text"
+          placeholder="Enter name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
 
-        <div>
-          <input
-            type="email"
-            placeholder="Enter email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-        </div>
+        <input
+          type="email"
+          placeholder="Enter email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
 
-        <div>
-          <input
-            type="password"
-            placeholder="Enter password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </div>
+        <input
+          type="password"
+          placeholder="Enter password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
 
-        <button type="submit">Register</button>
+        <button type="submit" disabled={loading}>
+          {loading ? "Registering..." : "Register"}
+        </button>
       </form>
     </div>
   );
